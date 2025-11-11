@@ -35,9 +35,8 @@ data "aws_ssm_parameter" "private_subnet_ids" {
   name = "/${var.project_name}/${var.environment}/private_subnet_ids"
 }
 
-# Fetch Security Group ID for 
 data "aws_ssm_parameter" "sg_id" {
-  name = "/${var.project_name}/${var.environment}/sg_id"
+  name = "/${var.project_name}/${var.environment}/${var.component}_sg_id"
 }
 
 # Fetch VPC ID used for the project
