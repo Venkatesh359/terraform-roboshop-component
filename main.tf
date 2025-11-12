@@ -6,6 +6,7 @@
 # ------------------------------------------------------------
 # 1. CREATE BASE EC2 INSTANCE
 # ------------------------------------------------------------
+
 resource "aws_instance" "main" {
   ami                    = local.ami_id            # Base AMI ID (RHEL/DevOps)
   instance_type          = "t3.micro"              # Instance type (small and cost-effective)
@@ -24,6 +25,8 @@ resource "aws_instance" "main" {
 # ------------------------------------------------------------
 # 2. RUN BOOTSTRAP SCRIPT VIA REMOTE-EXEC (ANSIBLE SETUP)
 # ------------------------------------------------------------
+
+
 resource "terraform_data" "main" {
   triggers_replace = [aws_instance.main.id] # Ensures re-provisioning if EC2 is replaced
 
@@ -53,6 +56,8 @@ resource "terraform_data" "main" {
 # ------------------------------------------------------------
 # 3. STOP THE INSTANCE TO CREATE AN AMI
 # ------------------------------------------------------------
+
+
 resource "aws_ec2_instance_state" "main" {
   instance_id = aws_instance.main.id
   state       = "stopped"             # Required before taking an AMI
@@ -62,6 +67,9 @@ resource "aws_ec2_instance_state" "main" {
 # ------------------------------------------------------------
 # 4. CREATE AMI (IMAGE) FROM THE CONFIGURED INSTANCE
 # ------------------------------------------------------------
+
+
+
 resource "aws_ami_from_instance" "main" {
   name               = "${local.common_name_suffix}-${var.component}-ami" # e.g., roboshop-dev-catalogue-ami
   source_instance_id = aws_instance.main.id
@@ -78,6 +86,8 @@ resource "aws_ami_from_instance" "main" {
 # ------------------------------------------------------------
 # 5. CREATE TARGET GROUP FOR LOAD BALANCER
 # ------------------------------------------------------------
+
+
 resource "aws_lb_target_group" "main" {
   name                 = "${local.common_name_suffix}-${var.component}"
   port                 = local.tg_port # Frontend → 80, Backends → 8080 (dynamic)
@@ -101,6 +111,8 @@ resource "aws_lb_target_group" "main" {
 # ------------------------------------------------------------
 # 6. CREATE LAUNCH TEMPLATE
 # ------------------------------------------------------------
+
+
 resource "aws_launch_template" "main" {
   name                   = "${local.common_name_suffix}-${var.component}"
   image_id               = aws_ami_from_instance.main.id # Use AMI created above
@@ -135,6 +147,8 @@ resource "aws_launch_template" "main" {
 # ------------------------------------------------------------
 # 7. CREATE AUTO SCALING GROUP (ASG)
 # ------------------------------------------------------------
+
+
 resource "aws_autoscaling_group" "main" {
   name                      = "${local.common_name_suffix}-${var.component}"
   max_size                  = 10 # Maximum 10 instances
@@ -181,6 +195,8 @@ resource "aws_autoscaling_group" "main" {
 # ------------------------------------------------------------
 # 8. AUTO SCALING POLICY (TARGET TRACKING)
 # ------------------------------------------------------------
+
+
 resource "aws_autoscaling_policy" "main" {
   autoscaling_group_name = aws_autoscaling_group.main.name
   name                   = "${local.common_name_suffix}-${var.component}"
@@ -197,6 +213,8 @@ resource "aws_autoscaling_policy" "main" {
 # ------------------------------------------------------------
 # 9. CREATE ALB LISTENER RULE (ROUTING)
 # ------------------------------------------------------------
+
+
 resource "aws_lb_listener_rule" "main" {
   listener_arn = local.listener_arn # Dynamically uses frontend/backend ALB listener
   priority     = var.rule_priority  # Controls rule order (unique per component)
@@ -218,6 +236,7 @@ resource "aws_lb_listener_rule" "main" {
 # ------------------------------------------------------------
 # 10. CLEANUP TEMPORARY EC2 INSTANCE
 # ------------------------------------------------------------
+
 resource "terraform_data" "main_local" {
   triggers_replace = [aws_instance.main.id]
   depends_on       = [aws_autoscaling_policy.main]
