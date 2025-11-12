@@ -75,7 +75,6 @@ locals {
   frontend_alb_listener_arn = data.aws_ssm_parameter.frontend_alb_listener_arn.value
 
   # ------------------------------------------------------------
-  # Listener ARN selection
   # If the component is frontend → use frontend ALB listener
   # Else → use backend ALB listener
   # This ensures each component connects to the correct ALB.
@@ -83,7 +82,6 @@ locals {
   listener_arn = "${var.component}" == "frontend" ? local.frontend_alb_listener_arn : local.backend_alb_listener_arn
 
   # ------------------------------------------------------------
-  # Host context (domain) for routing in ALB Listener Rules
   # If frontend → roboshop-dev.domain.com
   # Else → catalogue.backend-alb-dev.domain.com
   # Used in ALB host_header condition for each component.
