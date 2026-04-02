@@ -5,7 +5,7 @@ environment=$2
 dnf install ansible -y
 
 
-REPO_URL="https://github.com/Venkatesh359/ansible-roboshop-roles-tf.git"  # GitHub repo containing Ansible roles/playbooks
+REPO_URL="https://github.com/venkatesh-thomm/ansible-roboshop-roles-tf.git"  # GitHub repo containing Ansible roles/playbooks
 REPO_DIR="/opt/roboshop/ansible"                                      # Base directory for repo storage
 ANSIBLE_DIR="ansible-roboshop-roles-tf"    
 
